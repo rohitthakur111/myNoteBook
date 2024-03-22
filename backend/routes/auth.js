@@ -1,9 +1,11 @@
-import express from 'express'
-import User from '../models/Users.js'
+import express from 'express';
+import User from '../models/Users.js';
 import expressvalidator from 'express-validator';
-import bcrypt from 'bcryptjs'
-import dotenv from 'dotenv'
-import jsonwebtoken from 'jsonwebtoken'
+import bcrypt from 'bcryptjs';
+import dotenv from 'dotenv';
+import jsonwebtoken from 'jsonwebtoken';
+import fetchUser from '../middlware/fetchuser.js';
+const fetchuser = fetchUser;
 const jwtToken  = jsonwebtoken;
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -58,7 +60,7 @@ router.post('/createuser',[
  
 });
 
-// ROUTE 2: Authenticate user  using Post "/api/auth/login" Login User. || No login require
+// // ROUTE 2: Authenticate user  using Post "/api/auth/login" Login User. || No login require
 router.post('/login', [
     body('email', 'Enter a valid email address').isEmail(),
     body('password', 'Password cannot be blanked').exists(),
@@ -70,9 +72,9 @@ router.post('/login', [
             return res.status(200).json({ error : validEmail.array()});
         }
         const { email, password } = req.body;
-        const isUser = await User.findOne({ email : req.body.email });
+        const isUser = await User.findOne({ email : email });
         if(!isUser){ 
-            console.log('User have no  account on this email address : ' + req.body.email );
+            console.log('User have no  account on this email address : ' + email );
             return res.status(400).json({ error  : 'Login with correct email and password '});
         }
         const passwordCompare = await bcript.compare(password , isUser.password);
@@ -90,8 +92,21 @@ router.post('/login', [
         console.log(err);
         return res.status(500).send("Internal Server Error");
     }
-}
-)
+});
+// ROUTE 3: Get Loginin Detail Using : POST "/api/auth/getuser/"  -: User Login Required 
+router.post('/getuser' ,fetchuser, async(req,res)=>{
+    try {
+        const userId = req.user.id;
+        const user = await User.findById(userId).select("-password");
+        if(!user){
+            return res.status(404).send({ error: "User not found" });
+        }
+        res.send(user);
+    }catch(error){
+        console.log(error);
+        return res.status(500).send("Internal Server Error" + error);
+    }   
+});
 
-// Exports router 
+//exports router
 export default router;
