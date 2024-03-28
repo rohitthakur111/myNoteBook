@@ -30,7 +30,7 @@ router.post('/createuser',[
         try{
             let user = await User.findOne({email : req.body.email})
             if(user){
-                return res.status(400).json({ error : 'user is already registered with that account' })
+                return res.status(400).json({ error : 'user is already registered with this email address' })
             }
             const salt = await bcript.genSalt(10);
             const secPass = await bcript.hash(req.body.password, salt);
@@ -107,6 +107,5 @@ router.post('/getuser' ,fetchuser, async(req,res)=>{
         return res.status(500).send("Internal Server Error" + error);
     }   
 });
-
 //exports router
 export default router;
