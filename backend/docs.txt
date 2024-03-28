@@ -1,0 +1,8 @@
+// install mongodb 
+// node setup : npm init
+// install express in terminal 
+// install mongoose 
+// install dt env file 
+// install expressvalidator
+// install  bcryptjs
+// install jsonwebtoken
