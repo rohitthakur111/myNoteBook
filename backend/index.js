@@ -17,7 +17,7 @@ app.get('/hello', (req, res) => {
 })
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`myNotebook backend  app listening on port ${port}`)
 })
 
 
