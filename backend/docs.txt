@@ -6,3 +6,4 @@
 // install expressvalidator
 // install  bcryptjs
 // install jsonwebtoken
+// install npm i cors in backend

@@ -1,4 +1,3 @@
-import react, { useContext, useEffect } from 'react'
 
 const About = () =>{
 

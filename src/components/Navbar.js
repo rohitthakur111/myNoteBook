@@ -5,7 +5,6 @@ const Navbar = () => {
   let location = useLocation();
   useEffect(() => {
     // Google Analytics
-    console.log(location.pathname);
   }, [location]);
   return (
     <nav className="navbar navbar-expand-lg bg-dark navbar-dark sticky-top">
