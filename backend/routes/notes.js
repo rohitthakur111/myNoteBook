@@ -8,6 +8,7 @@ const { body, validationResult } = expressvalidator;
 const Notes = notes;    
 const app = express();
 const router = express.Router();
+let success = false;
 // ROUTE 1: Get a all notes using Get "/api/notes/fetchallnotes" 
 router.get('/fetchallnotes', fetchuser, async (req, res) => {
     const allNotes = await Notes.find({ user: req.user.id });
@@ -29,7 +30,8 @@ router.post('/addnote', fetchuser, [
             title, description, tag, user: req.user.id
         });
         const saveNotes = await myNotes.save();
-        res.status(201).json(saveNotes);  
+        success = true;
+        return res.status(201).json({success, saveNotes});  
     } catch (error) {
         console.log(error);
         return res.status(500).send("Internal Server Error");
@@ -50,7 +52,8 @@ router.put('/updatenote/:id', fetchuser, async (req, res) => {
         if(!note){return res.status(400).send("Note not found")};
         if(note.user.toString() !== req.user.id){ return res.status(401).send("Not Allowed");}
         note = await Notes.findByIdAndUpdate(req.params.id, { $set : newNote }, { new: true });
-        return res.json({note});
+        success = true 
+        return res.json({success, note});
     }catch(error){
         return res.status(500).send("Internal server error");
     }
@@ -65,7 +68,8 @@ router.put('/updatenote/:id', fetchuser, async (req, res) => {
         //allow to user delte to delete its notes
         if(note.user.toString() !== req.user.id){ return res.status(400).send("Not Allowed")}
         note = await Notes.findByIdAndDelete(req.params.id);
-        return res.status(201).json({ "Success" : "Note has been deleted", "note" : note });
+        success = true
+        return res.status(201).json({success, "Success" : "Note has been deleted", "note" : note });
     }catch(error){
         return res.status(500).send("Internal server error");
     }

@@ -1,34 +1,62 @@
 import './App.css';
-import React,{ useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import Home from './components/Home';
 import About from './components/About';
 import Alert from './components/Alerts';
 import NoteState from './context/notes/NoteState';
+import SignIn from './components/SignIn';
+import SignUp from './components/SignUp';
+
 function App() {
-    const [alert, setAlert] =useState(null);
-  const showAlert=(message)=>{
-    setAlert({msg : message});
-    setTimeout(function(){
+  const authToken = localStorage.getItem('authToken');
+  // const navigate = useNavigate();
+  const [user, setUser ] =  useState({ name : '', email : ''});
+  //showAlert function 
+  const [alert, setAlert] = useState(null);
+  const showAlert = (type, message) => {
+    setAlert({ type: type, msg: message });
+    setTimeout(function () {
       setAlert(null);
-    },1500);
+    }, 2000);
   }
-  //showAlert();
+
+  // fetch user detail using auth token 
+  const fetchUser = async (authToken) => {
+    const response = await fetch('http://localhost:5000/api/auth/getuser', {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "auth-Token": authToken
+      }
+    });
+    const json = await response.json();
+    console.log(json);
+    if (json.success) {
+      setUser({ name: json.user.name, email: json.user.email });
+    } else {
+      localStorage.removeItem('authToken');
+    }
+  }
+  useEffect(()=>{
+    fetchUser(authToken);
+  },[]);
   return (
     <>
-      <NoteState>
-        <Router>
+      <NoteState showAlert={showAlert}>
+        <BrowserRouter>
           <Navbar />
-          <Alert alert={alert}/>
+          <Alert alert={alert} />
           <div className="container">
-          <Routes>
-            <Route exact path="/" element={<Home showAlert={showAlert} />}> </Route>
-            <Route exact path="/about" element={<About />}> </Route>
-
-          </Routes>
+            <Routes>
+              <Route exact path="/" element={<Home showAlert={showAlert} />}> </Route>
+              <Route exact path="/about" element={<About />}> </Route>
+              <Route exact path="/signIn" element={<SignIn showAlert={showAlert} />}> </Route>
+              <Route exact path="/signUp" element={<SignUp showAlert={showAlert} />}> </Route>
+            </Routes>
           </div>
-        </Router>
+        </BrowserRouter>
       </NoteState>
     </>
   );

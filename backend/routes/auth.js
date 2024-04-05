@@ -13,11 +13,11 @@ const { body, validationResult } = expressvalidator;
 const bcript = bcrypt;
 const app = express();
 const router = express.Router();
-
+let success = false;
 // ROUTE 1: Create a user using Post "/api/auth/createuser" Creating User. || No login required 
 router.post('/createuser',[
     body('name' , 'Enter a valid name').isLength({min : 3}),
-    body('email', 'enter a valid name').isEmail(),
+    body('email', 'enter a valid email').isEmail(),
     body('password', 'Your password must be 5 character long').isLength({ min : 5 }),
 ], async (req, res)=>{
     // if there are errors return error and bad request 
@@ -30,7 +30,7 @@ router.post('/createuser',[
         try{
             let user = await User.findOne({email : req.body.email})
             if(user){
-                return res.status(400).json({ error : 'user is already registered with this email address' })
+                return res.status(400).json({ error : 'User is already registered with this email address' })
             }
             const salt = await bcript.genSalt(10);
             const secPass = await bcript.hash(req.body.password, salt);
@@ -44,9 +44,10 @@ router.post('/createuser',[
                     id : user.id
                 }
             }
+            success = true;
             const authToken = jwtToken.sign(data, JWT_SECRET );
             // res.status(201).json({ user });  
-            res.status(201).json(authToken);
+            res.status(201).json({success, authToken});
         }
         catch(err){
             console.log(err);
@@ -69,7 +70,7 @@ router.post('/login', [
         // if user have a account 
         const validEmail = validationResult(req);
         if(!validEmail.isEmpty()){
-            return res.status(200).json({ error : validEmail.array()});
+            return res.status(200).json({ errors : validEmail.array()});
         }
         const { email, password } = req.body;
         const isUser = await User.findOne({ email : email });
@@ -87,7 +88,7 @@ router.post('/login', [
             }
         }
         const loginToken = jwtToken.sign(payLoad, JWT_SECRET);
-        return res.json(loginToken);
+        return res.json({success,loginToken});
     }catch(err){
         console.log(err);
         return res.status(500).send("Internal Server Error");
@@ -98,10 +99,11 @@ router.post('/getuser' ,fetchuser, async(req,res)=>{
     try {
         const userId = req.user.id;
         const user = await User.findById(userId).select("-password");
-        if(!user){
-            return res.status(404).send({ error: "User not found" });
+        if(user){
+            success = true;
+            return res.send({success, user});
         }
-        res.send(user);
+        return res.status(404).send({ error: "User not found" });
     }catch(error){
         console.log(error);
         return res.status(500).send("Internal Server Error" + error);

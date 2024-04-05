@@ -14,3 +14,21 @@ code {
 i{
   cursor:pointer;
 }
+.login-card{  
+  background-color: #f8f8f8; /* Warna card */
+  padding: 20px;
+  border-radius: 12px; /* Border radius card */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding:20px 60px;
+}
+.form_link{
+  padding:5px;
+  text-decoration:none;
+  color:#151212;
+}
+.form_link span{
+  color:#475dd8;
+  font-weight:700;
+  padding-left:5px;
+  cursor:pointer;
+}
